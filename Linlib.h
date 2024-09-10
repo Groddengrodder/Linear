@@ -287,6 +287,20 @@ template <typename type> void is_same_size_add(const mat<type> &mat1, const mat<
     }
 }
 
+template <typename type> bool operator==(const vec<type> &vec1, const vec<type> &vec2) {
+    if (vec1.getSize() != vec2.getSize()) {
+        return false;
+    }
+
+    for (uint i = 0; i < vec1.getSize(); i++) {
+        if (vec1.comp[i] != vec2.comp[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 template <typename type> vec<type> operator+(const vec<type> &vec1, const vec<type> &vec2) {
     is_same_size(vec1, vec2);
 
@@ -352,6 +366,22 @@ template <typename type> type operator*(const vec<type> &vec1, const vec<type> &
     }
 
     return solution;
+}
+
+template <typename type> bool operator==(const mat<type> &mat1, const mat<type> &mat2) {
+    if (mat1.getRows() != mat2.getRows() || mat1.getColumns() != mat2.getColumns()) {
+        return false;
+    }
+
+    for (uint i = 0; i < mat1.getRows(); i++) {
+        for (uint j = 0; j < mat1.getColumns(); j++) {
+            if (mat1.comp[i][j] != mat2.comp[i][j]) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 template <typename type> mat<type> operator*(const mat<type> &mat1, const mat<type> &mat2) {
