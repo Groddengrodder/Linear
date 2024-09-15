@@ -5,5 +5,5 @@ int main(void) {
     int a = myVec[3];
     myVec.cross(Lin::vec<int>(5));
     Lin::mat<int> matrix(4, 4);
-    matrix[1][1];
+    matrix.fill(5).print();
 }

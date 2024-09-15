@@ -47,11 +47,11 @@ template <typename type> class vec {
         vector.comp = NULL;
     }
 
-    vec cross(const vec &other);
-    type len();
-    void print();
+    vec cross(const vec &other) const;
+    type len() const;
+    void print() const;
     vec &fill(type input);
-    type &operator[](uint index);
+    type &operator[](uint index) const;
 
     vec &operator=(const vec &vector) {
         uint Size = size < vector.getSize() ? size : vector.getSize();
@@ -190,11 +190,12 @@ template <typename type> class mat {
         matrix.rows = 0;
     }
 
-    type tr();
-    type det();
-    void print();
+    type tr() const;
+    type det() const;
+    void print() const;
     mat &fill(type input);
-    type *operator[](uint index);
+    type *operator[](uint index) const;
+    vec<type> operator()(const vec<type> &vector) const;
 
     mat &operator=(const mat &matrix) {
         rows = rows < matrix.getRows() ? rows : matrix.getRows();
@@ -263,13 +264,13 @@ template <typename type> class mat {
     uint rows;
 };
 
-template <typename type> void vec<type>::print() {
+template <typename type> void vec<type>::print() const {
     for (uint i = 0; i < size; i++) {
         printf("%.2le\n", (double)comp[i]);
     }
 }
 
-template <typename type> void mat<type>::print() {
+template <typename type> void mat<type>::print() const {
     for (uint i = 0; i < rows; i++) {
         for (uint j = 0; j < columns; j++) {
             printf("%.2le ", (double)comp[i][j]);
@@ -352,7 +353,7 @@ template <typename type> vec<type> operator*(const type &scalar, const vec<type>
     return std::move(solution);
 }
 
-template <typename type> type vec<type>::len() {
+template <typename type> type vec<type>::len() const {
     double solution = 0;
 
     for (uint i = 0; i < size; i++) {
@@ -363,7 +364,7 @@ template <typename type> type vec<type>::len() {
     return (type)solution;
 }
 
-template <typename type> vec<type> vec<type>::cross(const vec<type> &other) {
+template <typename type> vec<type> vec<type>::cross(const vec<type> &other) const {
     if (size != 3 || other.size != 3) {
         printf("Error: Cross product only works in d=3\n");
     }
@@ -377,7 +378,7 @@ template <typename type> vec<type> vec<type>::cross(const vec<type> &other) {
     return std::move(solution);
 }
 
-template <typename type> type &vec<type>::operator[](uint index) {
+template <typename type> type &vec<type>::operator[](uint index) const {
     if (index >= size) {
         printf("Attempted to acess out of bounds element in vector\n");
         exit(1);
@@ -489,7 +490,11 @@ template <typename type> vec<type> operator*(const mat<type> &matrix, const vec<
     return std::move(solution);
 }
 
-template <typename type> type mat<type>::tr() {
+template <typename type> vec<type> mat<type>::operator()(const vec<type> &vector) const {
+    return std::move(*this * vector);
+}
+
+template <typename type> type mat<type>::tr() const {
     if (rows != columns) {
         printf("Error: need square matrix\n");
         exit(1);
@@ -504,7 +509,7 @@ template <typename type> type mat<type>::tr() {
     return solution;
 }
 
-template <typename type> type *mat<type>::operator[](uint index) { return comp[index]; }
+template <typename type> type *mat<type>::operator[](uint index) const { return comp[index]; }
 
 template <typename type> mat<type> mat_minor(const mat<type> &matrix, uint row, uint column) {
     mat<type> minor(matrix.getRows() - 1, matrix.getColumns() - 1);
@@ -528,7 +533,7 @@ template <typename type> mat<type> mat_minor(const mat<type> &matrix, uint row, 
     return std::move(minor);
 }
 
-template <typename type> type mat<type>::det() {
+template <typename type> type mat<type>::det() const {
     type determinant = 0;
 
     if (rows != columns) {
