@@ -53,6 +53,11 @@ template <typename type> class vec {
     vec &fill(type input);
     type &operator[](uint index) const;
 
+    vec &operator+=(const vec &other);
+    vec &operator-=(const vec &other);
+    vec &operator*=(type other);
+    vec &operator/=(type other);
+
     vec &operator=(const vec &vector) {
         uint Size = size < vector.getSize() ? size : vector.getSize();
 
@@ -67,7 +72,7 @@ template <typename type> class vec {
         return *this;
     }
 
-    vec &operator=(const vec &&vector) {
+    vec &operator=(vec &&vector) {
         if (this == &vector) {
             return *this;
         }
@@ -197,9 +202,16 @@ template <typename type> class mat {
     type *operator[](uint index) const;
     vec<type> operator()(const vec<type> &vector) const;
 
+    mat &operator+=(const mat &other);
+    mat &operator-=(const mat &other);
+    mat &operator*=(type other);
+    mat &operator/=(type other);
+
     mat &operator=(const mat &matrix) {
-        rows = rows < matrix.getRows() ? rows : matrix.getRows();
-        columns = columns < matrix.getColumns() ? columns : matrix.getColumns();
+        if (rows != matrix.rows || columns != matrix.columns) {
+            printf("please\n");
+            exit(1);
+        }
 
         for (uint i = 0; i < rows; i++) {
             for (uint j = 0; j < columns; j++) {
@@ -308,6 +320,47 @@ template <typename type> vec<type> &vec<type>::fill(type input) {
     return *this;
 }
 
+template <typename type> vec<type> &vec<type>::operator+=(const vec<type> &other) {
+    is_same_size(*this, other);
+
+    for (uint i = 0; i < size; i++) {
+        comp[i] += other[i];
+    }
+
+    return *this;
+}
+
+template <typename type> vec<type> &vec<type>::operator-=(const vec<type> &other) {
+    is_same_size(*this, other);
+
+    for (uint i = 0; i < size; i++) {
+        comp[i] -= other[i];
+    }
+
+    return *this;
+}
+
+template <typename type> vec<type> &vec<type>::operator*=(type other) {
+    for (uint i = 0; i < size; i++) {
+        comp[i] *= other;
+    }
+
+    return *this;
+}
+
+template <typename type> vec<type> &vec<type>::operator/=(type other) {
+    if (other == 0) {
+        printf("dont divide by 0\n");
+        exit(1);
+    }
+
+    for (uint i = 0; i < size; i++) {
+        comp[i] /= other;
+    }
+
+    return *this;
+}
+
 template <typename type> bool operator==(const vec<type> &vec1, const vec<type> &vec2) {
     if (vec1.getSize() != vec2.getSize()) {
         return false;
@@ -330,7 +383,7 @@ template <typename type> vec<type> operator+(const vec<type> &vec1, const vec<ty
         solution.comp[i] = vec1.comp[i] + vec2.comp[i];
     }
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> vec<type> operator-(const vec<type> &vec1, const vec<type> &vec2) {
@@ -341,7 +394,7 @@ template <typename type> vec<type> operator-(const vec<type> &vec1, const vec<ty
         solution.comp[i] = vec1.comp[i] - vec2.comp[i];
     }
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> vec<type> operator*(const type &scalar, const vec<type> &vector) {
@@ -350,7 +403,7 @@ template <typename type> vec<type> operator*(const type &scalar, const vec<type>
         solution.comp[i] = scalar * vector.comp[i];
     }
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> type vec<type>::len() const {
@@ -375,7 +428,7 @@ template <typename type> vec<type> vec<type>::cross(const vec<type> &other) cons
     solution.comp[1] = comp[2] * other.comp[0] - comp[0] * other.comp[2];
     solution.comp[2] = comp[0] * other.comp[1] - comp[1] * other.comp[0];
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> type &vec<type>::operator[](uint index) const {
@@ -422,6 +475,42 @@ template <typename type> mat<type> &mat<type>::fill(type input) {
     return *this;
 }
 
+template <typename type> mat<type> &mat<type>::operator+=(const mat<type> &other) {
+    is_same_size_add(*this, other);
+
+    for (uint i = 0; i < rows * columns; i++) {
+        comp[0][i] += other[0][i];
+    }
+
+    return *this;
+}
+
+template <typename type> mat<type> &mat<type>::operator-=(const mat<type> &other) {
+    is_same_size_add(*this, other);
+
+    for (uint i = 0; i < rows * columns; i++) {
+        comp[0][i] -= other[0][i];
+    }
+
+    return *this;
+}
+
+template <typename type> mat<type> &mat<type>::operator*=(type other) {
+    for (uint i = 0; i < rows * columns; i++) {
+        comp[0][i] *= other;
+    }
+
+    return *this;
+}
+
+template <typename type> mat<type> &mat<type>::operator/=(type other) {
+    for (uint i = 0; i < rows * columns; i++) {
+        comp[0][i] /= other;
+    }
+
+    return *this;
+}
+
 template <typename type> mat<type> operator*(const mat<type> &mat1, const mat<type> &mat2) {
     is_same_size_mult(mat1, mat2);
 
@@ -434,7 +523,7 @@ template <typename type> mat<type> operator*(const mat<type> &mat1, const mat<ty
         }
     }
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> mat<type> operator*(const type scalar, const mat<type> &matrix) {
@@ -445,7 +534,7 @@ template <typename type> mat<type> operator*(const type scalar, const mat<type> 
         }
     }
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> mat<type> operator+(const mat<type> &mat1, const mat<type> &mat2) {
@@ -458,7 +547,7 @@ template <typename type> mat<type> operator+(const mat<type> &mat1, const mat<ty
         }
     }
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> mat<type> operator-(const mat<type> &mat1, const mat<type> &mat2) {
@@ -471,7 +560,7 @@ template <typename type> mat<type> operator-(const mat<type> &mat1, const mat<ty
         }
     }
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> vec<type> operator*(const mat<type> &matrix, const vec<type> &vector) {
@@ -487,11 +576,11 @@ template <typename type> vec<type> operator*(const mat<type> &matrix, const vec<
         }
     }
 
-    return std::move(solution);
+    return solution;
 }
 
 template <typename type> vec<type> mat<type>::operator()(const vec<type> &vector) const {
-    return std::move(*this * vector);
+    return ((*this) * vector);
 }
 
 template <typename type> type mat<type>::tr() const {
@@ -530,7 +619,7 @@ template <typename type> mat<type> mat_minor(const mat<type> &matrix, uint row, 
         }
     }
 
-    return std::move(minor);
+    return minor;
 }
 
 template <typename type> type mat<type>::det() const {
