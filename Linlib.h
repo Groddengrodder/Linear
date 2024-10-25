@@ -22,28 +22,28 @@ template <typename type> class vec {
             exit(1);
         }
 
-        size = input_size;
-        memset(comp, 0, size * sizeof(type));
+        m_size = input_size;
+        memset(comp, 0, m_size * sizeof(type));
     }
 
     vec(const vec<type> &vector) {
-        comp = (type *)malloc(vector.getSize() * sizeof(type));
+        comp = (type *)malloc(vector.size() * sizeof(type));
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
-        size = vector.getSize();
-        for (uint i = 0; i < size; i++) {
+        m_size = vector.size();
+        for (uint i = 0; i < m_size; i++) {
             comp[i] = vector.comp[i];
         }
     }
 
     vec(vec<type> &&vector) {
-        size = vector.size;
+        m_size = vector.m_size;
         comp = vector.comp;
 
-        vector.size = 0;
+        vector.m_size = 0;
         vector.comp = NULL;
     }
 
@@ -59,13 +59,13 @@ template <typename type> class vec {
     vec &operator/=(type other);
 
     vec &operator=(const vec &vector) {
-        uint Size = size < vector.getSize() ? size : vector.getSize();
+        uint Size = m_size < vector.size() ? m_size : vector.size();
 
         for (uint i = 0; i < Size; i++) {
             comp[i] = vector.comp[i];
         }
 
-        for (uint i = Size; i < size; i++) {
+        for (uint i = Size; i < m_size; i++) {
             comp[i] = 0;
         }
 
@@ -77,7 +77,7 @@ template <typename type> class vec {
             return *this;
         }
 
-        size = vector.size;
+        m_size = vector.m_size;
         if (comp != NULL) {
             type *temp = comp;
             free(temp);
@@ -85,7 +85,7 @@ template <typename type> class vec {
 
         comp = vector.comp;
 
-        vector.size = 0;
+        vector.m_size = 0;
         vector.comp = NULL;
 
         return *this;
@@ -99,10 +99,10 @@ template <typename type> class vec {
         }
     }
 
-    uint getSize() const { return size; }
+    uint size() const { return m_size; }
 
     private:
-    uint size;
+    uint m_size;
 };
 
 template <typename type> class mat {
@@ -110,96 +110,96 @@ template <typename type> class mat {
     type **comp;
 
     mat(uint input_rows, uint input_columns) {
-        columns = input_columns;
-        rows = input_rows;
+        m_columns = input_columns;
+        m_rows = input_rows;
 
-        comp = (type **)malloc(rows * sizeof(type *));
+        comp = (type **)malloc(m_rows * sizeof(type *));
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
-        col = (type *)malloc(rows * columns * sizeof(type));
+        col = (type *)malloc(m_rows * m_columns * sizeof(type));
         if (col == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
-        for (uint i = 0; i < rows; i++) {
-            comp[i] = col + i * columns;
+        for (uint i = 0; i < m_rows; i++) {
+            comp[i] = col + i * m_columns;
         }
 
-        memset(col, 0, rows * columns * sizeof(type));
+        memset(col, 0, m_rows * m_columns * sizeof(type));
     }
 
     mat(uint input) {
-        columns = input;
-        rows = input;
+        m_columns = input;
+        m_rows = input;
 
-        comp = (type **)malloc(rows * sizeof(type *));
+        comp = (type **)malloc(m_rows * sizeof(type *));
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
-        col = (type *)malloc(rows * columns * sizeof(type));
+        col = (type *)malloc(m_rows * m_columns * sizeof(type));
         if (col == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
-        for (uint i = 0; i < rows; i++) {
-            comp[i] = col + i * columns;
+        for (uint i = 0; i < m_rows; i++) {
+            comp[i] = col + i * m_columns;
         }
 
-        memset(col, 0, rows * columns * sizeof(type));
+        memset(col, 0, m_rows * m_columns * sizeof(type));
     }
 
     mat(const mat<type> &matrix) {
-        columns = matrix.getColumns();
-        rows = matrix.getRows();
+        m_columns = matrix.columns();
+        m_rows = matrix.rows();
 
-        comp = (type **)malloc(rows * sizeof(type *));
+        comp = (type **)malloc(m_rows * sizeof(type *));
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
-        col = (type *)malloc(rows * columns * sizeof(type));
+        col = (type *)malloc(m_rows * m_columns * sizeof(type));
         if (col == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
-        for (uint i = 0; i < rows; i++) {
-            comp[i] = col + i * columns;
+        for (uint i = 0; i < m_rows; i++) {
+            comp[i] = col + i * m_columns;
         }
 
-        for (uint i = 0; i < rows; i++) {
-            for (uint j = 0; j < columns; j++) {
+        for (uint i = 0; i < m_rows; i++) {
+            for (uint j = 0; j < m_columns; j++) {
                 comp[i][j] = matrix.comp[i][j];
             }
         }
     }
 
     mat(mat<type> &&matrix) {
-        columns = matrix.columns;
-        rows = matrix.rows;
+        m_columns = matrix.m_columns;
+        m_rows = matrix.m_rows;
 
         col = matrix.col;
         comp = matrix.comp;
 
         matrix.col = NULL;
         matrix.comp = NULL;
-        matrix.columns = 0;
-        matrix.rows = 0;
+        matrix.m_columns = 0;
+        matrix.m_rows = 0;
     }
 
     type tr() const;
     type det() const;
     void print() const;
     mat &fill(type input);
-    type *operator[](uint index) const;
+    type *&operator[](uint index) const;
     vec<type> operator()(const vec<type> &vector) const;
 
     mat &operator+=(const mat &other);
@@ -208,13 +208,13 @@ template <typename type> class mat {
     mat &operator/=(type other);
 
     mat &operator=(const mat &matrix) {
-        if (rows != matrix.rows || columns != matrix.columns) {
+        if (m_rows != matrix.m_rows || m_columns != matrix.m_columns) {
             printf("please\n");
             exit(1);
         }
 
-        for (uint i = 0; i < rows; i++) {
-            for (uint j = 0; j < columns; j++) {
+        for (uint i = 0; i < m_rows; i++) {
+            for (uint j = 0; j < m_columns; j++) {
                 comp[i][j] = matrix.comp[i][j];
             }
         }
@@ -227,8 +227,8 @@ template <typename type> class mat {
             return *this;
         }
 
-        rows = matrix.rows;
-        columns = matrix.columns;
+        m_rows = matrix.m_rows;
+        m_columns = matrix.m_columns;
 
         col = matrix.col;
 
@@ -244,8 +244,8 @@ template <typename type> class mat {
 
         comp = matrix.comp;
 
-        matrix.rows = 0;
-        matrix.columns = 0;
+        matrix.m_rows = 0;
+        matrix.m_columns = 0;
         matrix.col = NULL;
         matrix.comp = NULL;
 
@@ -265,26 +265,26 @@ template <typename type> class mat {
         }
     }
 
-    uint getRows() const { return rows; }
+    uint rows() const { return m_rows; }
 
-    uint getColumns() const { return columns; }
+    uint columns() const { return m_columns; }
 
     private:
     type *col;
 
-    uint columns;
-    uint rows;
+    uint m_columns;
+    uint m_rows;
 };
 
 template <typename type> void vec<type>::print() const {
-    for (uint i = 0; i < size; i++) {
+    for (uint i = 0; i < m_size; i++) {
         printf("%.2le\n", (double)comp[i]);
     }
 }
 
 template <typename type> void mat<type>::print() const {
-    for (uint i = 0; i < rows; i++) {
-        for (uint j = 0; j < columns; j++) {
+    for (uint i = 0; i < m_rows; i++) {
+        for (uint j = 0; j < m_columns; j++) {
             printf("%.2le ", (double)comp[i][j]);
         }
         printf("\n");
@@ -292,28 +292,28 @@ template <typename type> void mat<type>::print() const {
 }
 
 template <typename type> void is_same_size(const vec<type> &vec1, const vec<type> &vec2) {
-    if (vec1.getSize() != vec2.getSize()) {
+    if (vec1.size() != vec2.size()) {
         fprintf(stderr, "Error: Vectors have to have the same size\n");
         exit(1);
     }
 }
 
 template <typename type> void is_same_size_mult(const mat<type> &mat1, const mat<type> &mat2) {
-    if (mat1.getColumns() != mat2.getRows()) {
+    if (mat1.columns() != mat2.rows()) {
         fprintf(stderr, "Error: Matrices have to have the same size\n");
         exit(1);
     }
 }
 
 template <typename type> void is_same_size_add(const mat<type> &mat1, const mat<type> &mat2) {
-    if (mat1.getRows() != mat2.getRows() || mat1.getColumns() != mat2.getColumns()) {
+    if (mat1.rows() != mat2.rows() || mat1.columns() != mat2.columns()) {
         fprintf(stderr, "Error: Matrices have to have the same size\n");
         exit(1);
     }
 }
 
 template <typename type> vec<type> &vec<type>::fill(type input) {
-    for (uint i = 0; i < size; i++) {
+    for (uint i = 0; i < m_size; i++) {
         comp[i] = input;
     }
 
@@ -323,7 +323,7 @@ template <typename type> vec<type> &vec<type>::fill(type input) {
 template <typename type> vec<type> &vec<type>::operator+=(const vec<type> &other) {
     is_same_size(*this, other);
 
-    for (uint i = 0; i < size; i++) {
+    for (uint i = 0; i < m_size; i++) {
         comp[i] += other[i];
     }
 
@@ -333,7 +333,7 @@ template <typename type> vec<type> &vec<type>::operator+=(const vec<type> &other
 template <typename type> vec<type> &vec<type>::operator-=(const vec<type> &other) {
     is_same_size(*this, other);
 
-    for (uint i = 0; i < size; i++) {
+    for (uint i = 0; i < m_size; i++) {
         comp[i] -= other[i];
     }
 
@@ -341,7 +341,7 @@ template <typename type> vec<type> &vec<type>::operator-=(const vec<type> &other
 }
 
 template <typename type> vec<type> &vec<type>::operator*=(type other) {
-    for (uint i = 0; i < size; i++) {
+    for (uint i = 0; i < m_size; i++) {
         comp[i] *= other;
     }
 
@@ -354,7 +354,7 @@ template <typename type> vec<type> &vec<type>::operator/=(type other) {
         exit(1);
     }
 
-    for (uint i = 0; i < size; i++) {
+    for (uint i = 0; i < m_size; i++) {
         comp[i] /= other;
     }
 
@@ -362,11 +362,11 @@ template <typename type> vec<type> &vec<type>::operator/=(type other) {
 }
 
 template <typename type> bool operator==(const vec<type> &vec1, const vec<type> &vec2) {
-    if (vec1.getSize() != vec2.getSize()) {
+    if (vec1.size() != vec2.size()) {
         return false;
     }
 
-    for (uint i = 0; i < vec1.getSize(); i++) {
+    for (uint i = 0; i < vec1.size(); i++) {
         if (vec1.comp[i] != vec2.comp[i]) {
             return false;
         }
@@ -378,8 +378,8 @@ template <typename type> bool operator==(const vec<type> &vec1, const vec<type> 
 template <typename type> vec<type> operator+(const vec<type> &vec1, const vec<type> &vec2) {
     is_same_size(vec1, vec2);
 
-    vec<type> solution(vec1.getSize());
-    for (uint i = 0; i < vec1.getSize(); i++) {
+    vec<type> solution(vec1.size());
+    for (uint i = 0; i < vec1.size(); i++) {
         solution.comp[i] = vec1.comp[i] + vec2.comp[i];
     }
 
@@ -389,8 +389,8 @@ template <typename type> vec<type> operator+(const vec<type> &vec1, const vec<ty
 template <typename type> vec<type> operator-(const vec<type> &vec1, const vec<type> &vec2) {
     is_same_size(vec1, vec2);
 
-    vec<type> solution(vec1.getSize());
-    for (uint i = 0; i < vec1.getSize(); i++) {
+    vec<type> solution(vec1.size());
+    for (uint i = 0; i < vec1.size(); i++) {
         solution.comp[i] = vec1.comp[i] - vec2.comp[i];
     }
 
@@ -398,8 +398,8 @@ template <typename type> vec<type> operator-(const vec<type> &vec1, const vec<ty
 }
 
 template <typename type> vec<type> operator*(const type &scalar, const vec<type> &vector) {
-    vec<type> solution(vector.getSize());
-    for (uint i = 0; i < vector.getSize(); i++) {
+    vec<type> solution(vector.size());
+    for (uint i = 0; i < vector.size(); i++) {
         solution.comp[i] = scalar * vector.comp[i];
     }
 
@@ -409,7 +409,7 @@ template <typename type> vec<type> operator*(const type &scalar, const vec<type>
 template <typename type> type vec<type>::len() const {
     double solution = 0;
 
-    for (uint i = 0; i < size; i++) {
+    for (uint i = 0; i < m_size; i++) {
         solution += pow(comp[i], 2);
     }
     solution = sqrt(solution);
@@ -418,7 +418,7 @@ template <typename type> type vec<type>::len() const {
 }
 
 template <typename type> vec<type> vec<type>::cross(const vec<type> &other) const {
-    if (size != 3 || other.size != 3) {
+    if (m_size != 3 || other.m_size != 3) {
         printf("Error: Cross product only works in d=3\n");
     }
 
@@ -432,7 +432,7 @@ template <typename type> vec<type> vec<type>::cross(const vec<type> &other) cons
 }
 
 template <typename type> type &vec<type>::operator[](uint index) const {
-    if (index >= size) {
+    if (index >= m_size) {
         printf("Attempted to acess out of bounds element in vector\n");
         exit(1);
     }
@@ -444,7 +444,7 @@ template <typename type> type operator*(const vec<type> &vec1, const vec<type> &
     is_same_size(vec1, vec2);
 
     type solution = 0;
-    for (uint i = 0; i < vec1.getSize(); i++) {
+    for (uint i = 0; i < vec1.size(); i++) {
         solution += vec1.comp[i] * vec2.comp[i];
     }
 
@@ -452,12 +452,12 @@ template <typename type> type operator*(const vec<type> &vec1, const vec<type> &
 }
 
 template <typename type> bool operator==(const mat<type> &mat1, const mat<type> &mat2) {
-    if (mat1.getRows() != mat2.getRows() || mat1.getColumns() != mat2.getColumns()) {
+    if (mat1.rows() != mat2.rows() || mat1.columns() != mat2.columns()) {
         return false;
     }
 
-    for (uint i = 0; i < mat1.getRows(); i++) {
-        for (uint j = 0; j < mat1.getColumns(); j++) {
+    for (uint i = 0; i < mat1.rows(); i++) {
+        for (uint j = 0; j < mat1.columns(); j++) {
             if (mat1.comp[i][j] != mat2.comp[i][j]) {
                 return false;
             }
@@ -468,7 +468,7 @@ template <typename type> bool operator==(const mat<type> &mat1, const mat<type> 
 }
 
 template <typename type> mat<type> &mat<type>::fill(type input) {
-    for (uint i = 0; i < rows * columns; i++) {
+    for (uint i = 0; i < m_rows * m_columns; i++) {
         comp[0][i] = input;
     }
 
@@ -478,7 +478,7 @@ template <typename type> mat<type> &mat<type>::fill(type input) {
 template <typename type> mat<type> &mat<type>::operator+=(const mat<type> &other) {
     is_same_size_add(*this, other);
 
-    for (uint i = 0; i < rows * columns; i++) {
+    for (uint i = 0; i < m_rows * m_columns; i++) {
         comp[0][i] += other[0][i];
     }
 
@@ -488,7 +488,7 @@ template <typename type> mat<type> &mat<type>::operator+=(const mat<type> &other
 template <typename type> mat<type> &mat<type>::operator-=(const mat<type> &other) {
     is_same_size_add(*this, other);
 
-    for (uint i = 0; i < rows * columns; i++) {
+    for (uint i = 0; i < m_rows * m_columns; i++) {
         comp[0][i] -= other[0][i];
     }
 
@@ -496,7 +496,7 @@ template <typename type> mat<type> &mat<type>::operator-=(const mat<type> &other
 }
 
 template <typename type> mat<type> &mat<type>::operator*=(type other) {
-    for (uint i = 0; i < rows * columns; i++) {
+    for (uint i = 0; i < m_rows * m_columns; i++) {
         comp[0][i] *= other;
     }
 
@@ -504,7 +504,7 @@ template <typename type> mat<type> &mat<type>::operator*=(type other) {
 }
 
 template <typename type> mat<type> &mat<type>::operator/=(type other) {
-    for (uint i = 0; i < rows * columns; i++) {
+    for (uint i = 0; i < m_rows * m_columns; i++) {
         comp[0][i] /= other;
     }
 
@@ -514,10 +514,10 @@ template <typename type> mat<type> &mat<type>::operator/=(type other) {
 template <typename type> mat<type> operator*(const mat<type> &mat1, const mat<type> &mat2) {
     is_same_size_mult(mat1, mat2);
 
-    mat<type> solution(mat1.getRows(), mat2.getColumns());
-    for (uint i = 0; i < mat1.getRows(); i++) {
-        for (uint j = 0; j < mat2.getColumns(); j++) {
-            for (uint k = 0; k < mat1.getColumns(); k++) {
+    mat<type> solution(mat1.rows(), mat2.columns());
+    for (uint i = 0; i < mat1.rows(); i++) {
+        for (uint j = 0; j < mat2.columns(); j++) {
+            for (uint k = 0; k < mat1.columns(); k++) {
                 solution.comp[i][j] += mat1[i][k] * mat2[k][j];
             }
         }
@@ -527,9 +527,9 @@ template <typename type> mat<type> operator*(const mat<type> &mat1, const mat<ty
 }
 
 template <typename type> mat<type> operator*(const type scalar, const mat<type> &matrix) {
-    mat<type> solution(matrix.getRows(), matrix.getColumns());
-    for (uint i = 0; i < matrix.getRows(); i++) {
-        for (uint j = 0; j < matrix.getColumns(); j++) {
+    mat<type> solution(matrix.rows(), matrix.columns());
+    for (uint i = 0; i < matrix.rows(); i++) {
+        for (uint j = 0; j < matrix.columns(); j++) {
             solution.comp[i][j] = scalar * matrix.comp[i][j];
         }
     }
@@ -540,9 +540,9 @@ template <typename type> mat<type> operator*(const type scalar, const mat<type> 
 template <typename type> mat<type> operator+(const mat<type> &mat1, const mat<type> &mat2) {
     is_same_size_add(mat1, mat2);
 
-    mat<type> solution(mat1.getRows(), mat1.getColumns());
-    for (uint i = 0; i < mat1.getRows(); i++) {
-        for (uint j = 0; j < mat1.getColumns(); j++) {
+    mat<type> solution(mat1.rows(), mat1.columns());
+    for (uint i = 0; i < mat1.rows(); i++) {
+        for (uint j = 0; j < mat1.columns(); j++) {
             solution.comp[i][j] = mat1.comp[i][j] + mat2.comp[i][j];
         }
     }
@@ -553,9 +553,9 @@ template <typename type> mat<type> operator+(const mat<type> &mat1, const mat<ty
 template <typename type> mat<type> operator-(const mat<type> &mat1, const mat<type> &mat2) {
     is_same_size_add(mat1, mat2);
 
-    mat<type> solution(mat1.getRows(), mat1.getColumns());
-    for (uint i = 0; i < mat1.getRows(); i++) {
-        for (uint j = 0; j < mat1.getColumns(); j++) {
+    mat<type> solution(mat1.rows(), mat1.columns());
+    for (uint i = 0; i < mat1.rows(); i++) {
+        for (uint j = 0; j < mat1.columns(); j++) {
             solution.comp[i][j] = mat1.comp[i][j] - mat2.comp[i][j];
         }
     }
@@ -564,14 +564,14 @@ template <typename type> mat<type> operator-(const mat<type> &mat1, const mat<ty
 }
 
 template <typename type> vec<type> operator*(const mat<type> &matrix, const vec<type> &vector) {
-    vec<type> solution(vector.getSize());
-    if (vector.getSize() != matrix.getColumns()) {
+    vec<type> solution(vector.size());
+    if (vector.size() != matrix.columns()) {
         printf("welp\n");
         exit(1);
     }
 
-    for (uint i = 0; i < matrix.getRows(); i++) {
-        for (uint j = 0; j < matrix.getColumns(); j++) {
+    for (uint i = 0; i < matrix.rows(); i++) {
+        for (uint j = 0; j < matrix.columns(); j++) {
             solution.comp[i] += matrix.comp[i][j] * vector.comp[j];
         }
     }
@@ -584,34 +584,48 @@ template <typename type> vec<type> mat<type>::operator()(const vec<type> &vector
 }
 
 template <typename type> type mat<type>::tr() const {
-    if (rows != columns) {
+    if (m_rows != m_columns) {
         printf("Error: need square matrix\n");
         exit(1);
     }
 
     type solution = 0;
 
-    for (uint i = 0; i < rows; i++) {
+    for (uint i = 0; i < m_rows; i++) {
         solution += comp[i][i];
     }
 
     return solution;
 }
 
-template <typename type> type *mat<type>::operator[](uint index) const { return comp[index]; }
+template <typename type> type *&mat<type>::operator[](uint index) const { return comp[index]; }
+
+template <typename type> mat<type> LU(const mat<type> matrix) {
+    assert(matrix.rows() == matrix.columns());
+    mat<type> lu(matrix.rows, matrix.columns);
+    lu[0][0] = matrix[0][0];
+    assert(matrix[0][0] != 0);
+    for (uint i = 0; i < matrix.columns(); i++) {
+        lu[0][i] = matrix[0][i];
+        lu[i][0] = matrix[i][0] / matrix[0][0];
+    }
+
+    for (uint i = 0; i < matrix.rows; i++) {
+    }
+}
 
 template <typename type> mat<type> mat_minor(const mat<type> &matrix, uint row, uint column) {
-    mat<type> minor(matrix.getRows() - 1, matrix.getColumns() - 1);
+    mat<type> minor(matrix.rows() - 1, matrix.columns() - 1);
 
     bool offi = 0;
     bool offj = 0;
 
-    for (uint i = 0; i < minor.rows; i++) {
+    for (uint i = 0; i < minor.m_rows; i++) {
         if (i >= row) {
             offi = 1;
         }
         offj = 0;
-        for (uint j = 0; j < minor.columns; j++) {
+        for (uint j = 0; j < minor.m_columns; j++) {
             if (j >= column) {
                 offj = 1;
             }
@@ -625,16 +639,16 @@ template <typename type> mat<type> mat_minor(const mat<type> &matrix, uint row, 
 template <typename type> type mat<type>::det() const {
     type determinant = 0;
 
-    if (rows != columns) {
+    if (m_rows != m_columns) {
         printf("Error: Determinant only defined on square matrices\n");
         exit(1);
     }
 
-    if (rows == 1) {
+    if (m_rows == 1) {
         determinant = comp[0][0];
     } else {
         int one = 1;
-        for (uint i = 0; i < rows; i++) {
+        for (uint i = 0; i < m_rows; i++) {
             determinant += one * comp[i][0] * mat_minor(*this, i, 0).det();
             one *= -1;
         }
@@ -642,30 +656,31 @@ template <typename type> type mat<type>::det() const {
     return determinant;
 }
 
-template <typename type> vec<type> vec_solve(const mat<type> &matrix, const vec<type> &vector) {
-    mat<type> matrix_temp(matrix.getRows(), matrix.getColumns());
-    vec<type> vector_temp(vector.getSize());
-    vec<type> solution(vector.getSize());
+template <typename type>
+vec<type> vec_solve_gauss(const mat<type> &matrix, const vec<type> &vector) {
+    mat<type> matrix_temp(matrix.rows(), matrix.columns());
+    vec<type> vector_temp(vector.size());
+    vec<type> solution(vector.size());
 
-    if (matrix.getColumns() != vector.rows) {
+    if (matrix.columns() != vector.rows) {
         printf("Error: Invalid system of equations\n");
         exit(1);
     }
 
-    for (uint i = 0; i < matrix.getRows(); i++) {
-        for (uint j = 0; j < matrix.getColumns(); j++) {
+    for (uint i = 0; i < matrix.rows(); i++) {
+        for (uint j = 0; j < matrix.columns(); j++) {
             matrix_temp.comp[i][j] = matrix.comp[i][j];
         }
     }
-    for (uint i = 0; i < matrix.getRows(); i++) {
+    for (uint i = 0; i < matrix.rows(); i++) {
         vector_temp.comp[i] = vector.comp[i];
         solution.comp[i] = 0;
     }
 
-    for (uint i = 0; i < matrix.getColumns(); i++) {
+    for (uint i = 0; i < matrix.columns(); i++) {
         int temp = -1;
-        for (uint j = 0; j < matrix.getRows(); j++) {
-            for (uint k = 0; k < matrix.getColumns(); k++) {
+        for (uint j = 0; j < matrix.rows(); j++) {
+            for (uint k = 0; k < matrix.columns(); k++) {
                 if (matrix_temp.comp[j][k] != 0 && k != i) {
                     break;
                 }
@@ -679,10 +694,10 @@ template <typename type> vec<type> vec_solve(const mat<type> &matrix, const vec<
             }
         }
         if (temp != -1) {
-            for (uint j = 0; j < matrix.getRows(); j++) {
+            for (uint j = 0; j < matrix.rows(); j++) {
                 if (temp != j) {
                     if (matrix_temp.comp[j][i] != 0) {
-                        for (uint k = 0; k < matrix.getColumns(); k++) {
+                        for (uint k = 0; k < matrix.columns(); k++) {
                             matrix_temp.comp[j][k] =
                                 matrix_temp.comp[j][k] + matrix_temp.comp[temp][k];
                         }
@@ -693,9 +708,9 @@ template <typename type> vec<type> vec_solve(const mat<type> &matrix, const vec<
         }
     }
 
-    for (uint i = 0; i < matrix.getRows(); i++) {
+    for (uint i = 0; i < matrix.rows(); i++) {
         int temp = -2;
-        for (uint j = 0; j < matrix.getColumns(); j++) {
+        for (uint j = 0; j < matrix.columns(); j++) {
             if (matrix_temp.comp[i][j] != 0) {
                 temp = j;
                 break;

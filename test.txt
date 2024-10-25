@@ -1,0 +1,4 @@
+Lapack
+CBLAS
+Boost
+gsl
