@@ -59,6 +59,9 @@ template <typename type> class vec {
     vec &operator*=(type other);
     vec &operator/=(type other);
 
+    vec &add(const vec &vec1, const vec &vec2);
+    vec &mult(type scalar);
+
     vec &operator=(const vec &vector) {
         uint Size = m_size < vector.size() ? m_size : vector.size();
 
@@ -201,6 +204,7 @@ template <typename type> class mat {
     void print() const;
     mat &fill(type input);
     static mat identity(uint size);
+    mat &transpose();
     type *&operator[](uint index) const;
     vec<type> operator()(const vec<type> &vector) const;
 
@@ -208,6 +212,10 @@ template <typename type> class mat {
     mat &operator-=(const mat &other);
     mat &operator*=(type other);
     mat &operator/=(type other);
+
+    mat &add(const mat &mat1, const mat &mat2);
+    mat &mult(type scalar);
+    mat &mult(const mat &mat1, const mat &mat2);
 
     mat &operator=(const mat &matrix) {
         if (m_rows != matrix.m_rows || m_columns != matrix.m_columns) {
