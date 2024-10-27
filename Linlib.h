@@ -1,6 +1,7 @@
 #ifndef __LINLIB__
 #define __LINLIB__
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -199,6 +200,7 @@ template <typename type> class mat {
     type det() const;
     void print() const;
     mat &fill(type input);
+    static mat identity(uint size);
     type *&operator[](uint index) const;
     vec<type> operator()(const vec<type> &vector) const;
 
@@ -275,6 +277,21 @@ template <typename type> class mat {
     uint m_columns;
     uint m_rows;
 };
+
+template <> void vec<int>::print() const {
+    for (uint i = 0; i < m_size; i++) {
+        printf("%d\n", comp[i]);
+    }
+}
+
+template <> void mat<int>::print() const {
+    for (uint i = 0; i < m_rows; i++) {
+        for (uint j = 0; j < m_columns; j++) {
+            printf("%d ", comp[i][j]);
+        }
+        printf("\n");
+    }
+}
 
 template <typename type> void vec<type>::print() const {
     for (uint i = 0; i < m_size; i++) {
@@ -475,6 +492,15 @@ template <typename type> mat<type> &mat<type>::fill(type input) {
     return *this;
 }
 
+template <typename type> mat<type> mat<type>::identity(uint size) {
+    mat<type> I(size);
+    for (uint i = 0; i < I.rows(); i++) {
+        I[i][i] = 1;
+    }
+
+    return I;
+}
+
 template <typename type> mat<type> &mat<type>::operator+=(const mat<type> &other) {
     is_same_size_add(*this, other);
 
@@ -600,18 +626,41 @@ template <typename type> type mat<type>::tr() const {
 
 template <typename type> type *&mat<type>::operator[](uint index) const { return comp[index]; }
 
-template <typename type> mat<type> LU(const mat<type> matrix) {
+template <typename type> mat<type> LU(const mat<type> &matrix) {
     assert(matrix.rows() == matrix.columns());
-    mat<type> lu(matrix.rows, matrix.columns);
-    lu[0][0] = matrix[0][0];
+    mat<type> lu(matrix.rows(), matrix.columns());
     assert(matrix[0][0] != 0);
-    for (uint i = 0; i < matrix.columns(); i++) {
-        lu[0][i] = matrix[0][i];
-        lu[i][0] = matrix[i][0] / matrix[0][0];
+    for (uint j = 0; j < matrix.rows(); j++) {
+        type sum = 0;
+
+        sum = 0;
+        for (uint i = 0; i < j; i++) {
+            for (uint k = 0; k < i; k++) {
+                sum += lu[i][k] * lu[k][j];
+            }
+
+            lu[i][j] = matrix[i][j] - sum;
+        }
+
+        sum = 0;
+        for (uint k = 0; k < j; k++) {
+            sum += lu[j][k] * lu[k][j];
+        }
+
+        lu[j][j] = matrix[j][j] - sum;
+
+        sum = 0;
+        for (uint i = j + 1; i < matrix.rows(); i++) {
+            for (uint k = 0; k < i; k++) {
+                sum += lu[i][k] * lu[k][j];
+            }
+
+            assert(lu[j][j] != 0);
+            lu[i][j] = 1. / lu[j][j] * (matrix[i][j] - sum);
+        }
     }
 
-    for (uint i = 0; i < matrix.rows; i++) {
-    }
+    return lu;
 }
 
 template <typename type> mat<type> mat_minor(const mat<type> &matrix, uint row, uint column) {
