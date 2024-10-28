@@ -52,6 +52,7 @@ template <typename type> class vec {
     type len() const;
     void print() const;
     vec &fill(type input);
+    vec &rand_fill(uint input);
     type &operator[](uint index) const;
 
     vec &operator+=(const vec &other);
@@ -61,6 +62,7 @@ template <typename type> class vec {
 
     vec &add(const vec &vec1, const vec &vec2);
     vec &mult(type scalar, const vec &vector);
+    vec &mult(const mat<type> &matrix, const vec &vector);
 
     vec &operator=(const vec &vector) {
         uint Size = m_size < vector.size() ? m_size : vector.size();
@@ -203,6 +205,7 @@ template <typename type> class mat {
     type det() const;
     void print() const;
     mat &fill(type input);
+    mat &rand_fill(uint input);
     static mat identity(uint size);
     mat &transpose();
     type *&operator[](uint index) const;
@@ -357,6 +360,23 @@ template <typename type> vec<type> &vec<type>::mult(type scalar, const vec<type>
     return *this;
 }
 
+template <typename type>
+vec<type> &vec<type>::mult(const mat<type> &matrix, const vec<type> &vector) {
+    assert(m_size == matrix.rows());
+    assert(matrix.columns() == vector.size());
+
+    for (uint i = 0; i < m_size; i++) {
+        type sum = 0;
+        for (uint j = 0; j < vector.size(); j++) {
+            sum += matrix[i][j] * vector[j];
+        }
+
+        comp[i] = sum;
+    }
+
+    return *this;
+}
+
 template <typename type> mat<type> &mat<type>::add(const mat<type> &mat1, const mat<type> &mat2) {
     assert(mat1.rows() == mat2.rows() && m_rows == mat1.rows());
     assert(mat1.columns() == mat2.columns && m_columns == mat1.columns());
@@ -422,6 +442,14 @@ template <typename type> mat<type> &mat<type>::transpose() {
 template <typename type> vec<type> &vec<type>::fill(type input) {
     for (uint i = 0; i < m_size; i++) {
         comp[i] = input;
+    }
+
+    return *this;
+}
+
+template <typename type> vec<type> &vec<type>::rand_fill(uint input) {
+    for (uint i = 0; i < m_size; i++) {
+        comp[i] = (type)(rand() % input);
     }
 
     return *this;
@@ -577,6 +605,14 @@ template <typename type> bool operator==(const mat<type> &mat1, const mat<type> 
 template <typename type> mat<type> &mat<type>::fill(type input) {
     for (uint i = 0; i < m_rows * m_columns; i++) {
         comp[0][i] = input;
+    }
+
+    return *this;
+}
+
+template <typename type> mat<type> &mat<type>::rand_fill(uint input) {
+    for (uint i = 0; i < m_rows * m_columns; i++) {
+        comp[0][i] = (type)(rand() % input);
     }
 
     return *this;
@@ -759,12 +795,12 @@ template <typename type> mat<type> mat_minor(const mat<type> &matrix, uint row, 
     bool offi = 0;
     bool offj = 0;
 
-    for (uint i = 0; i < minor.m_rows; i++) {
+    for (uint i = 0; i < minor.rows(); i++) {
         if (i >= row) {
             offi = 1;
         }
         offj = 0;
-        for (uint j = 0; j < minor.m_columns; j++) {
+        for (uint j = 0; j < minor.columns(); j++) {
             if (j >= column) {
                 offj = 1;
             }
@@ -795,13 +831,32 @@ template <typename type> type mat<type>::det() const {
     return determinant;
 }
 
-template <typename type>
-vec<type> vec_solve_gauss(const mat<type> &matrix, const vec<type> &vector) {
+template <typename type> vec<type> solve_cramer(const mat<type> &matrix, const vec<type> &vector) {
+    assert(matrix.rows() == matrix.columns());
+    assert(matrix.columns() == vector.size());
+
+    vec<type> solution(vector.size());
+
+    type det = matrix.det();
+    for (uint j = 0; j < solution.size(); j++) {
+        type sum = 0;
+        for (uint i = 0; i < solution.size(); i++) {
+            sum += vector[j] * pow(-1, i + j) * mat_minor(matrix, i, j).det();
+        }
+
+        solution[j] = sum / det;
+    }
+
+    return solution;
+}
+
+// TODO: This has to be fixed
+template <typename type> vec<type> solve_gauss(const mat<type> &matrix, const vec<type> &vector) {
     mat<type> matrix_temp(matrix.rows(), matrix.columns());
     vec<type> vector_temp(vector.size());
     vec<type> solution(vector.size());
 
-    if (matrix.columns() != vector.rows) {
+    if (matrix.columns() != vector.size()) {
         printf("Error: Invalid system of equations\n");
         exit(1);
     }
