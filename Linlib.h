@@ -60,7 +60,7 @@ template <typename type> class vec {
     vec &operator/=(type other);
 
     vec &add(const vec &vec1, const vec &vec2);
-    vec &mult(type scalar);
+    vec &mult(type scalar, const vec &vector);
 
     vec &operator=(const vec &vector) {
         uint Size = m_size < vector.size() ? m_size : vector.size();
@@ -214,7 +214,7 @@ template <typename type> class mat {
     mat &operator/=(type other);
 
     mat &add(const mat &mat1, const mat &mat2);
-    mat &mult(type scalar);
+    mat &mult(type scalar, const mat &matrix);
     mat &mult(const mat &mat1, const mat &mat2);
 
     mat &operator=(const mat &matrix) {
@@ -335,6 +335,88 @@ template <typename type> void is_same_size_add(const mat<type> &mat1, const mat<
         fprintf(stderr, "Error: Matrices have to have the same size\n");
         exit(1);
     }
+}
+
+template <typename type> vec<type> &vec<type>::add(const vec<type> &vec1, const vec<type> &vec2) {
+    assert(vec1.size() == vec2.size() && m_size == vec1.size());
+
+    for (uint i = 0; i < m_size; i++) {
+        comp[i] = vec1[i] + vec2[i];
+    }
+
+    return *this;
+}
+
+template <typename type> vec<type> &vec<type>::mult(type scalar, const vec<type> &vector) {
+    assert(m_size == vector.size());
+
+    for (uint i = 0; i < m_size; i++) {
+        comp[i] = scalar * vector[i];
+    }
+
+    return *this;
+}
+
+template <typename type> mat<type> &mat<type>::add(const mat<type> &mat1, const mat<type> &mat2) {
+    assert(mat1.rows() == mat2.rows() && m_rows == mat1.rows());
+    assert(mat1.columns() == mat2.columns && m_columns == mat1.columns());
+
+    for (uint i = 0; i < m_rows * m_columns; i++) {
+        comp[0][i] = mat1[0][i] + mat2[0][i];
+    }
+
+    return *this;
+}
+
+template <typename type> mat<type> &mat<type>::mult(const type scalar, const mat<type> &matrix) {
+    assert(m_rows == matrix.rows() && m_columns == matrix.columns());
+
+    for (uint i = 0; i < m_rows * m_columns; i++) {
+        comp[0][i] = scalar * matrix[0][i];
+    }
+
+    return *this;
+}
+
+template <typename type> mat<type> &mat<type>::mult(const mat<type> &mat1, const mat<type> &mat2) {
+    is_same_size_mult(mat1, mat2);
+    assert(m_rows == mat1.rows() && m_columns == mat2.columns());
+
+    for (uint i = 0; i < mat1.rows(); i++) {
+        for (uint j = 0; j < mat2.columns(); j++) {
+            type sum = 0;
+            for (uint k = 0; k < mat1.columns(); k++) {
+                sum += mat1[i][k] * mat2[k][j];
+            }
+            comp[i][j] = sum;
+        }
+    }
+
+    return *this;
+}
+
+template <typename type> mat<type> &mat<type>::transpose() {
+    if (m_rows == m_columns) {
+        for (uint i = 0; i < m_rows; i++) {
+            for (uint j = 0; j < i; j++) {
+                type temp = comp[i][j];
+                comp[i][j] = comp[j][i];
+                comp[j][i] = temp;
+            }
+        }
+        return *this;
+    }
+
+    mat<type> matrix(m_columns, m_rows);
+    for (uint i = 0; i < matrix.rows(); i++) {
+        for (uint j = 0; j < matrix.columns(); j++) {
+            matrix[i][j] = comp[j][i];
+        }
+    }
+
+    *this = std::move(matrix);
+
+    return *this;
 }
 
 template <typename type> vec<type> &vec<type>::fill(type input) {
