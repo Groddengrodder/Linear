@@ -291,14 +291,14 @@ template <typename type> class mat {
 
 template <> void vec<int>::print() const {
     for (uint i = 0; i < m_size; i++) {
-        printf("%d\n", comp[i]);
+        printf("%+d\n", comp[i]);
     }
 }
 
 template <> void mat<int>::print() const {
     for (uint i = 0; i < m_rows; i++) {
         for (uint j = 0; j < m_columns; j++) {
-            printf("%d ", comp[i][j]);
+            printf("%+d ", comp[i][j]);
         }
         printf("\n");
     }
@@ -306,14 +306,14 @@ template <> void mat<int>::print() const {
 
 template <typename type> void vec<type>::print() const {
     for (uint i = 0; i < m_size; i++) {
-        printf("%.2le\n", (double)comp[i]);
+        printf("%+.2le\n", (double)comp[i]);
     }
 }
 
 template <typename type> void mat<type>::print() const {
     for (uint i = 0; i < m_rows; i++) {
         for (uint j = 0; j < m_columns; j++) {
-            printf("%.2le ", (double)comp[i][j]);
+            printf("%+.2le ", (double)comp[i][j]);
         }
         printf("\n");
     }
@@ -759,8 +759,8 @@ template <typename type> mat<type> LU(const mat<type> &matrix) {
     for (uint j = 0; j < matrix.rows(); j++) {
         type sum = 0;
 
-        sum = 0;
         for (uint i = 0; i < j; i++) {
+            sum = 0;
             for (uint k = 0; k < i; k++) {
                 sum += lu[i][k] * lu[k][j];
             }
@@ -775,8 +775,8 @@ template <typename type> mat<type> LU(const mat<type> &matrix) {
 
         lu[j][j] = matrix[j][j] - sum;
 
-        sum = 0;
         for (uint i = j + 1; i < matrix.rows(); i++) {
+            sum = 0;
             for (uint k = 0; k < i; k++) {
                 sum += lu[i][k] * lu[k][j];
             }
@@ -822,7 +822,7 @@ template <typename type> type mat<type>::det() const {
     if (m_rows == 1) {
         determinant = comp[0][0];
     } else {
-        int one = 1;
+        double one = 1;
         for (uint i = 0; i < m_rows; i++) {
             determinant += one * comp[i][0] * mat_minor(*this, i, 0).det();
             one *= -1;
@@ -838,13 +838,43 @@ template <typename type> vec<type> solve_cramer(const mat<type> &matrix, const v
     vec<type> solution(vector.size());
 
     type det = matrix.det();
+    assert(det != 0);
     for (uint j = 0; j < solution.size(); j++) {
         type sum = 0;
         for (uint i = 0; i < solution.size(); i++) {
-            sum += vector[j] * pow(-1, i + j) * mat_minor(matrix, i, j).det();
+            sum += vector[i] * pow(-1, i + j) * mat_minor(matrix, i, j).det();
         }
 
         solution[j] = sum / det;
+    }
+
+    return solution;
+}
+
+template <typename type> vec<type> solve_LU(const mat<type> &matrix, const vec<type> &vector) {
+    assert(matrix.rows() == matrix.columns());
+    assert(matrix.columns() == vector.size());
+
+    vec<type> solution(vector.size());
+    vec<type> y(vector.size());
+    mat<type> lu = LU(matrix);
+
+    for (uint i = 0; i < y.size(); i++) {
+        type sum = 0;
+        for (uint j = 0; j < i; j++) {
+            sum += lu[i][j] * y[j];
+        }
+
+        y[i] = vector[i] - sum;
+    }
+
+    for (int i = vector.size() - 1; i >= 0; i--) {
+        type sum = 0;
+        for (uint j = i + 1; j < vector.size(); j++) {
+            sum += lu[i][j] * solution[j];
+        }
+        assert(lu[i][i] != 0);
+        solution[i] = (y[i] - sum) / lu[i][i];
     }
 
     return solution;
