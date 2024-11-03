@@ -880,10 +880,9 @@ template <typename type> vec<type> solve_LU(const mat<type> &matrix, const vec<t
     return solution;
 }
 
-// TODO: This has to be fixed
 template <typename type> vec<type> solve_gauss(const mat<type> &matrix, const vec<type> &vector) {
-    mat<type> matrix_temp(matrix.rows(), matrix.columns());
-    vec<type> vector_temp(vector.size());
+    mat<type> matrix_temp = matrix;
+    vec<type> vector_temp = vector;
     vec<type> solution(vector.size());
 
     if (matrix.columns() != vector.size()) {
@@ -891,24 +890,16 @@ template <typename type> vec<type> solve_gauss(const mat<type> &matrix, const ve
         exit(1);
     }
 
-    for (uint i = 0; i < matrix.rows(); i++) {
-        for (uint j = 0; j < matrix.columns(); j++) {
-            matrix_temp.comp[i][j] = matrix.comp[i][j];
-        }
-    }
-    for (uint i = 0; i < matrix.rows(); i++) {
-        vector_temp.comp[i] = vector.comp[i];
-        solution.comp[i] = 0;
-    }
+    const double epsilon = 1.e-8;
 
     for (uint i = 0; i < matrix.columns(); i++) {
         int temp = -1;
         for (uint j = 0; j < matrix.rows(); j++) {
             for (uint k = 0; k < matrix.columns(); k++) {
-                if (matrix_temp.comp[j][k] != 0 && k != i) {
+                if (fabs(matrix_temp[j][k]) >= epsilon && k != i) {
                     break;
                 }
-                if (matrix_temp.comp[j][k] != 0 && k == i) {
+                if (fabs(matrix_temp[j][k]) >= epsilon && k == i) {
                     temp = j;
                     break;
                 }
@@ -917,32 +908,40 @@ template <typename type> vec<type> solve_gauss(const mat<type> &matrix, const ve
                 break;
             }
         }
-        if (temp != -1) {
-            for (uint j = 0; j < matrix.rows(); j++) {
-                if (temp != j) {
-                    if (matrix_temp.comp[j][i] != 0) {
-                        for (uint k = 0; k < matrix.columns(); k++) {
-                            matrix_temp.comp[j][k] =
-                                matrix_temp.comp[j][k] + matrix_temp.comp[temp][k];
-                        }
-                        vector_temp.comp[j] = vector_temp.comp[j] + vector_temp.comp[temp];
-                    }
-                }
+
+        if (temp == -1) {
+            continue;
+        }
+
+        for (uint j = 0; j < matrix.rows(); j++) {
+            if (temp == j) {
+                continue;
             }
+            if (fabs(matrix_temp[j][i]) < epsilon) {
+                continue;
+            }
+
+            type factor = matrix_temp[j][i];
+
+            for (uint k = 0; k < matrix.columns(); k++) {
+                matrix_temp[j][k] =
+                    matrix_temp[j][k] - matrix_temp[temp][k] / matrix_temp[temp][i] * factor;
+            }
+            vector_temp[j] = vector_temp[j] - vector_temp[temp] / matrix_temp[temp][i] * factor;
         }
     }
 
     for (uint i = 0; i < matrix.rows(); i++) {
         int temp = -2;
         for (uint j = 0; j < matrix.columns(); j++) {
-            if (matrix_temp.comp[i][j] != 0) {
+            if (fabs(matrix_temp[i][j]) >= epsilon) {
                 temp = j;
                 break;
             }
         }
         if (temp != -2) {
-            solution.comp[temp] = vector_temp.comp[i];
-        } else if (temp == -2 && vector_temp.comp[i] != 0) {
+            solution[temp] = vector_temp[i] / matrix_temp[i][temp];
+        } else if (temp == -2 && fabs(vector_temp[i]) >= epsilon) {
             printf("Warning: System of equations was unsolvable\n");
             break;
         }

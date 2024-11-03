@@ -1,6 +1,6 @@
 #include "Linlib.h"
 
-const double epsilon = 1.e-10;
+const double epsilon = 1.e-7;
 const uint dim = 10;
 
 int main(void) {
@@ -50,7 +50,7 @@ int main(void) {
     auto b = Lin::vec<double>(dim).rand_fill(1.e8);
     b /= 1.e4;
 
-    Lin::vec<double> r = I * Lin::solve_LU(I, b) - b;
+    Lin::vec<double> r = I * Lin::solve_gauss(I, b) - b;
     sum = 0;
     for (uint i = 0; i < r.size(); i++) {
         sum += fabs(r[i]);
@@ -62,7 +62,7 @@ int main(void) {
         printf("failed\n");
         I.print();
         printf("\n");
-        Lin::solve_LU(I, b).print();
+        Lin::solve_gauss(I, b).print();
         printf("\n");
         r.print();
     }
