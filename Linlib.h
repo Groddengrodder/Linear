@@ -203,6 +203,7 @@ template <typename type> class mat {
 
     type tr() const;
     type det() const;
+    type det_LU() const;
     void print() const;
     mat &fill(type input);
     mat &rand_fill(uint input);
@@ -948,6 +949,19 @@ template <typename type> vec<type> solve_gauss(const mat<type> &matrix, const ve
     }
 
     return solution;
+}
+
+template <typename type> type mat<type>::det_LU() const {
+    assert(m_rows == m_columns);
+
+    mat<type> lu = LU(*this);
+
+    type det = 1;
+    for (uint i = 0; i < m_rows; i++) {
+        det *= lu[i][i];
+    }
+
+    return det;
 }
 } // namespace Lin
 #endif

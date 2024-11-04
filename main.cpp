@@ -66,4 +66,15 @@ int main(void) {
         printf("\n");
         r.print();
     }
+
+    auto detTest = Lin::mat<double>(dim).rand_fill(10);
+    if (detTest.det() - detTest.det_LU() < epsilon) {
+        printf("passed\n");
+    } else {
+        detTest.print();
+        double det = detTest.det_LU();
+        printf("\n");
+        printf("det = %lf\n", det);
+        printf("error = %lf\n", det - detTest.det());
+    }
 }
