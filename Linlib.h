@@ -10,6 +10,10 @@
 #include <time.h>
 
 namespace Lin {
+#ifdef __TRACK_ALLOC__
+uint alloc_tracker = 0;
+#endif
+
 template <typename type> class mat;
 
 template <typename type> class vec {
@@ -18,6 +22,11 @@ template <typename type> class vec {
 
     vec(uint input_size) {
         comp = (type *)malloc(input_size * sizeof(type));
+
+#ifdef __TRACK_ALLOC__
+        alloc_tracker++;
+#endif
+
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
@@ -29,6 +38,11 @@ template <typename type> class vec {
 
     vec(const vec<type> &vector) {
         comp = (type *)malloc(vector.size() * sizeof(type));
+
+#ifdef __TRACK_ALLOC__
+        alloc_tracker++;
+#endif
+
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
@@ -120,12 +134,22 @@ template <typename type> class mat {
         m_rows = input_rows;
 
         comp = (type **)malloc(m_rows * sizeof(type *));
+
+#ifdef __TRACK_ALLOC__
+        alloc_tracker++;
+#endif
+
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
         col = (type *)malloc(m_rows * m_columns * sizeof(type));
+
+#ifdef __TRACK_ALLOC__
+        alloc_tracker++;
+#endif
+
         if (col == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
@@ -143,12 +167,22 @@ template <typename type> class mat {
         m_rows = input;
 
         comp = (type **)malloc(m_rows * sizeof(type *));
+
+#ifdef __TRACK_ALLOC__
+        alloc_tracker++;
+#endif
+
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
         col = (type *)malloc(m_rows * m_columns * sizeof(type));
+
+#ifdef __TRACK_ALLOC__
+        alloc_tracker++;
+#endif
+
         if (col == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
@@ -166,12 +200,22 @@ template <typename type> class mat {
         m_rows = matrix.rows();
 
         comp = (type **)malloc(m_rows * sizeof(type *));
+
+#ifdef __TRACK_ALLOC__
+        alloc_tracker++;
+#endif
+
         if (comp == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
         }
 
         col = (type *)malloc(m_rows * m_columns * sizeof(type));
+
+#ifdef __TRACK_ALLOC__
+        alloc_tracker++;
+#endif
+
         if (col == NULL) {
             printf("Error: Couldnt allocate memory\n");
             exit(1);
@@ -323,6 +367,7 @@ template <typename type> void mat<type>::print() const {
 template <typename type> void is_same_size(const vec<type> &vec1, const vec<type> &vec2) {
     if (vec1.size() != vec2.size()) {
         fprintf(stderr, "Error: Vectors have to have the same size\n");
+        printf("%d  %d\n", vec1.size(), vec2.size());
         exit(1);
     }
 }
@@ -783,7 +828,7 @@ template <typename type> mat<type> LU(const mat<type> &matrix) {
             }
 
             assert(lu[j][j] != 0);
-            lu[i][j] = 1. / lu[j][j] * (matrix[i][j] - sum);
+            lu[i][j] = (matrix[i][j] - sum) / lu[j][j];
         }
     }
 

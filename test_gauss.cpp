@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     auto vector = Lin::vec<double>(dim).rand_fill(100);
 
     auto s = clock();
-    Lin::vec<double> solution = Lin::solve_gauss(matrix, vector);
+    Lin::vec<double> solution = Lin::solve_LU(matrix, vector);
     auto e = clock();
 
     Lin::vec<double> residuum = matrix * solution;
