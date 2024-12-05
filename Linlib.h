@@ -9,6 +9,8 @@
 #include <string.h>
 #include <time.h>
 
+typedef unsigned int uint;
+
 namespace Lin {
 #ifdef __TRACK_ALLOC__
 uint alloc_tracker = 0;
