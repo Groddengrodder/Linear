@@ -427,7 +427,7 @@ vec<type> &vec<type>::mult(const mat<type> &matrix, const vec<type> &vector) {
 
 template <typename type> mat<type> &mat<type>::add(const mat<type> &mat1, const mat<type> &mat2) {
     assert(mat1.rows() == mat2.rows() && m_rows == mat1.rows());
-    assert(mat1.columns() == mat2.columns && m_columns == mat1.columns());
+    assert(mat1.columns() == mat2.columns() && m_columns == mat1.columns());
 
     for (uint i = 0; i < m_rows * m_columns; i++) {
         comp[0][i] = mat1[0][i] + mat2[0][i];
