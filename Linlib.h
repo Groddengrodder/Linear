@@ -426,7 +426,7 @@ template <typename type> void mat<type>::print() const {
 
 template <typename type>
 void is_same_size(const vec<type> &vec1, const vec<type> &vec2) {
-  assert(vec1.size() != vec2.size());
+  assert(vec1.size() == vec2.size());
   if (vec1.size() != vec2.size()) {
     throw std::length_error("Vectors have to have the same size");
   }
@@ -434,7 +434,7 @@ void is_same_size(const vec<type> &vec1, const vec<type> &vec2) {
 
 template <typename type>
 void is_same_size_mult(const mat<type> &mat1, const mat<type> &mat2) {
-  assert(mat1.columns() != mat2.rows());
+  assert(mat1.columns() == mat2.rows());
   if (mat1.columns() != mat2.rows()) {
     throw std::length_error("Matrices have to have the same size");
   }
@@ -442,7 +442,7 @@ void is_same_size_mult(const mat<type> &mat1, const mat<type> &mat2) {
 
 template <typename type>
 void is_same_size_add(const mat<type> &mat1, const mat<type> &mat2) {
-  assert(mat1.rows() != mat2.rows() || mat1.columns() != mat2.columns());
+  assert(mat1.rows() == mat2.rows() && mat1.columns() == mat2.columns());
   if (mat1.rows() != mat2.rows() || mat1.columns() != mat2.columns()) {
     throw std::length_error("Matrices have to have the same size");
   }

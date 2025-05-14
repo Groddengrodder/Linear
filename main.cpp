@@ -4,77 +4,77 @@ const double epsilon = 1.e-7;
 const uint dim = 10;
 
 int main(void) {
-    srand(time(NULL));
+  srand(time(NULL));
 
-    Lin::mat<double> matrix(dim);
-    while (matrix.det() < epsilon) {
-        matrix.rand_fill(1.e8);
-        matrix /= 1.e4;
+  Lin::mat<double> matrix(dim);
+  while (matrix.det() < epsilon) {
+    matrix.rand_fill(1.e8);
+    matrix /= 1.e4;
+  }
+
+  Lin::mat<double> lu = Lin::LU(matrix);
+
+  Lin::mat<double> u(dim);
+  Lin::mat<double> l(dim);
+
+  for (uint j = 0; j < dim; j++) {
+    for (uint i = 0; i <= j; i++) {
+      u[i][j] = lu[i][j];
     }
 
-    Lin::mat<double> lu = Lin::LU(matrix);
-
-    Lin::mat<double> u(dim);
-    Lin::mat<double> l(dim);
-
-    for (uint j = 0; j < dim; j++) {
-        for (uint i = 0; i <= j; i++) {
-            u[i][j] = lu[i][j];
-        }
-
-        for (uint i = j + 1; i < dim; i++) {
-            l[i][j] = lu[i][j];
-        }
-
-        l[j][j] = 1;
+    for (uint i = j + 1; i < dim; i++) {
+      l[i][j] = lu[i][j];
     }
 
-    Lin::mat<double> test = matrix - (l * u);
-    double sum = 0;
-    for (uint i = 0; i < dim * dim; i++) {
-        sum += fabs(test[0][i]);
-    }
+    l[j][j] = 1;
+  }
 
-    if (sum < epsilon) {
-        printf("passed\n");
-    } else {
-        printf("failed\n");
-    }
+  Lin::mat<double> test = matrix - (l * u);
+  double sum = 0;
+  for (uint i = 0; i < dim * dim; i++) {
+    sum += fabs(test[0][i]);
+  }
 
-    Lin::mat<double> I(dim);
-    while (I.det() < epsilon) {
-        I.rand_fill(1.e8);
-        I /= 1.e4;
-    }
+  if (sum < epsilon) {
+    printf("passed\n");
+  } else {
+    printf("failed\n");
+  }
 
-    auto b = Lin::vec<double>(dim).rand_fill(1.e8);
-    b /= 1.e4;
+  Lin::mat<double> I(dim);
+  while (I.det() < epsilon) {
+    I.rand_fill(1.e8);
+    I /= 1.e4;
+  }
 
-    Lin::vec<double> r = I * Lin::solve_gauss(I, b) - b;
-    sum = 0;
-    for (uint i = 0; i < r.size(); i++) {
-        sum += fabs(r[i]);
-    }
+  auto b = Lin::vec<double>(dim).rand_fill(1.e8);
+  b /= 1.e4;
 
-    if (sum < epsilon) {
-        printf("passed\n");
-    } else {
-        printf("failed\n");
-        I.print();
-        printf("\n");
-        Lin::solve_gauss(I, b).print();
-        printf("\n");
-        r.print();
-    }
+  Lin::vec<double> r = I * Lin::solve_gauss(I, b) - b;
+  sum = 0;
+  for (uint i = 0; i < r.size(); i++) {
+    sum += fabs(r[i]);
+  }
 
-    auto detTest = Lin::mat<double>(dim).rand_fill(10);
-    if (detTest.det() - detTest.det_LU() < epsilon) {
-        printf("passed\n");
-    } else {
-        detTest.print();
-        double det = detTest.det_LU();
-        printf("\n");
-        printf("det = %lf\n", det);
-        printf("error = %lf\n", det - detTest.det());
-    }
+  if (sum < epsilon) {
+    printf("passed\n");
+  } else {
+    printf("failed\n");
+    I.print();
+    printf("\n");
+    Lin::solve_gauss(I, b).print();
+    printf("\n");
+    r.print();
+  }
+
+  auto detTest = Lin::mat<double>(dim).rand_fill(10);
+  if (detTest.det() - detTest.det_LU() < epsilon) {
+    printf("passed\n");
+  } else {
+    detTest.print();
+    double det = detTest.det_LU();
+    printf("\n");
+    printf("det = %lf\n", det);
+    printf("error = %lf\n", det - detTest.det());
+  }
 }
