@@ -285,8 +285,7 @@ template <typename type> class mat {
         comp = matrix.comp;
 
         matrix.col = nullptr;
-        matrix.comp->pointer = nullptr;
-        matrix.comp->size = 0;
+        matrix.comp = nullptr;
         matrix.m_columns = 0;
         matrix.m_rows = 0;
     }
@@ -374,13 +373,13 @@ template <typename type> class mat {
 
         col = matrix.col;
 
-        if (comp[0] != nullptr) {
-            type *temp = comp[0];
+        if (col != nullptr) {
+            type *temp = col;
             delete[] temp;
         }
 
         if (comp != nullptr) {
-            type **temp = comp;
+            auto temp = comp;
             delete[] temp;
         }
 
@@ -389,8 +388,7 @@ template <typename type> class mat {
         matrix.m_rows = 0;
         matrix.m_columns = 0;
         matrix.col = nullptr;
-        matrix.comp->pointer = nullptr;
-        matrix.comp->size = 0;
+        matrix.comp = nullptr;
 
         return *this;
     }
@@ -399,7 +397,7 @@ template <typename type> class mat {
         array<type>(*temp1) = comp;
         type *temp2 = col;
         col = nullptr;
-        comp->pointer = nullptr;
+        comp = nullptr;
         if (temp1 != nullptr) {
             delete[] temp1;
         }
