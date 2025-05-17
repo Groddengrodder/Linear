@@ -4,7 +4,7 @@ using namespace Lin;
 int main(void) {
     vec vector = {1, 2, 3, 4};
     printf("%d\n", vector[-1]);
-    for (auto i : vector) {
+    for (int i : vector) {
         printf("%d", i);
     }
 

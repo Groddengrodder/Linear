@@ -159,11 +159,6 @@ template <typename type> class mat {
         uint size = 0;
         type2 operator*() { return *pointer; }
         type2 &operator[](int index) {
-            assert(index < (int)size);
-            if (index >= (int)size) {
-                throw std::out_of_range("nono");
-            }
-
             if (index >= 0) {
                 return pointer[index];
             } else {
