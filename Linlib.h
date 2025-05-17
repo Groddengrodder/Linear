@@ -643,6 +643,10 @@ template <typename type> bool operator==(const vec<type> &vec1, const vec<type> 
     return true;
 }
 
+template <typename type> bool operator!=(const vec<type> &vec1, const vec<type> &vec2) {
+    return !(vec1 == vec2);
+}
+
 template <typename type> vec<type> operator+(const vec<type> &vec1, const vec<type> &vec2) {
     is_same_size(vec1, vec2);
 
@@ -738,6 +742,10 @@ template <typename type> bool operator==(const mat<type> &mat1, const mat<type> 
     }
 
     return true;
+}
+
+template <typename type> bool operator!=(const mat<type> &mat1, const mat<type> &mat2) {
+    return !(mat1 == mat2);
 }
 
 template <typename type> mat<type> &mat<type>::fill(type input) {
